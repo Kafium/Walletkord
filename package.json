@@ -1,0 +1,14 @@
+{
+    "name": "kafiwallet",
+    "version": "0.1.2",
+    "description": "Kafium official Discord bot with blockchain explorer.",
+    "license": "GPL-2.0",
+    "engines": {
+        "node": "14.x"
+    },
+    "dependencies": {
+        "discord.js": "^12.5.3",
+        "noble-ed25519": "^1.2.5",
+        "discord-buttons": "^4.0.0"
+    }
+}
