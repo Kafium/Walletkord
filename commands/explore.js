@@ -71,14 +71,6 @@ module.exports = {
 	},
 }
 
-function errorEmbed(reason) {
-  const errorEmbed = new Discord.MessageEmbed()
-    .setTitle('Error')
-    .setColor('#D22B2B')
-    .setDescription(reason);
-  return errorEmbed
-}
-
 function waitForData(socket, waitingData) {
   return new Promise((resolve, reject) => {
       socket.on('data', listener)
