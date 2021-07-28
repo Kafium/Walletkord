@@ -2,6 +2,7 @@ const Discord = require('discord.js')
 
 module.exports = {
   command: 'balance',
+  alias: 'bal',
 	execute(message, args, db, walletSocket) {
     if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
 

@@ -9,6 +9,7 @@
     "dependencies": {
         "discord.js": "^12.5.3",
         "noble-ed25519": "^1.2.5",
-        "discord-buttons": "^4.0.0"
+        "discord-buttons": "^4.0.0",
+        "quick.db": "^7.1.3"
     }
 }
