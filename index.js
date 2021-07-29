@@ -7,7 +7,7 @@ const walletSocket = new net.Socket()
 
 const fs = require('fs')
 
-const uint8 = require('../utils/uint8')
+const uint8 = require('./utils/uint8')
 const config = require('./config.json')
 
 const client = new Discord.Client()
@@ -28,15 +28,15 @@ walletSocket.connect(config.nodeToCommunicate.split(':')[1], config.nodeToCommun
 		console.log('Ready!')
 
 		if (!db.get(client.user.id)) {
-    const key = curve.utils.randomPrivateKey()
-    curve.getPublicKey(key).then(publicKey => { 
-      const pubKey = uint8.uint8ToHex(publicKey) 
-      const privateKey = uint8.uint8ToHex(key).toUpperCase()
+			const key = curve.utils.randomPrivateKey()
+			curve.getPublicKey(key).then(publicKey => { 
+				const pubKey = uint8.uint8ToHex(publicKey) 
+				const privateKey = uint8.uint8ToHex(key).toUpperCase()
 
-      db.set(client.user.id, { privKey: privateKey, publicKey: 'K#' + pubKey })	
-		})
+				db.set(client.user.id, { privKey: privateKey, publicKey: 'K#' + pubKey })	
+			})
 		}
-	});
+	})
 
 	client.on('message', message => {
 		if (!message.content.startsWith('?') || message.author.bot) return

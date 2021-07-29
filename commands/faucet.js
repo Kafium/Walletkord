@@ -15,14 +15,14 @@ module.exports = {
     waitForData(walletSocket, 'lastHash').then(hash => {
         const createdAt = Date.now()
         const latestHash = hash.toString().split('/')[1].replace('&&', '')
-        const calculateHash = crypto.createHash('ripemd160').update(parseInt(createdAt) + latestHash + db.get(client.user.id).publicKey + db.get(user.id).publicKey + (60 * 100)).digest('hex')
+        const calculateHash = crypto.createHash('ripemd160').update(parseInt(createdAt) + latestHash + db.get(client.user.id).publicKey + db.get(user.id).publicKey + (200 * 100)).digest('hex')
         curve.sign(calculateHash, db.get(client.user.id).privKey).then(tx => {
-          walletSocket.write(`newRawTransaction/${db.get(client.user.id).publicKey}|${db.get(user.id).publicKey}|${60 * 100}|${tx}|${createdAt}&&`)
+          walletSocket.write(`newRawTransaction/${db.get(client.user.id).publicKey}|${db.get(user.id).publicKey}|${200 * 100}|${tx}|${createdAt}&&`)
           waitForData(walletSocket, 'rawTransactionSuccess').then(() => {
             const tranEmbed = new Discord.MessageEmbed()
             .setTitle('Transaction success!')
             .setColor('#1AAC7A')
-            .setDescription(`${client.user.toString()} tipped 60 Kafiums to ${user.toString()}.`)
+            .setDescription(`${client.user.toString()} tipped 200 Kafiums to ${user.toString()}.`)
             .addField(`**Hash:**`, `\`\`${calculateHash}\`\``);
             message.channel.send(tranEmbed)
           }).catch(err => {
