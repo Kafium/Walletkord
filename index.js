@@ -1,13 +1,9 @@
 const db = require('quick.db')
-const curve = require('noble-ed25519')
 const Discord = require('discord.js')
-
-const net = require('net')
-const walletSocket = new net.Socket()
+const kafiumJS = require('kafiumJS')
 
 const fs = require('fs')
 
-const uint8 = require('./utils/uint8')
 const config = require('./config.json')
 
 const client = new Discord.Client()
@@ -15,7 +11,9 @@ require('discord-buttons')(client)
 
 client.commands = new Discord.Collection()
 
-walletSocket.connect(config.nodeToCommunicate.split(':')[1], config.nodeToCommunicate.split(':')[0], function () {
+const walletSocket = new kafiumJS.Web3(config.nodeToCommunicate)
+
+walletSocket.on('ready', function() {
 	const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 
 	for (const file of commandFiles) {
@@ -28,12 +26,8 @@ walletSocket.connect(config.nodeToCommunicate.split(':')[1], config.nodeToCommun
 		console.log('Ready!')
 
 		if (!db.get(client.user.id)) {
-			const key = curve.utils.randomPrivateKey()
-			curve.getPublicKey(key).then(publicKey => { 
-				const pubKey = uint8.uint8ToHex(publicKey) 
-				const privateKey = uint8.uint8ToHex(key).toUpperCase()
-
-				db.set(client.user.id, { privKey: privateKey, publicKey: 'K#' + pubKey })	
+			kafiumJS.createWallet().then(walletObj => { 
+				db.set(client.user.id, { KWallet: walletObj.KWallet, publicKey: walletObj.publicKey, privKey: walletObj.privateKey })	
 			})
 		}
 	})

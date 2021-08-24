@@ -1,18 +1,13 @@
 const Discord = require('discord.js')
-const curve = require('noble-ed25519')
-const uint8 = require('../utils/uint8')
+const kafiumJS = require('kafiumJS')
 
 module.exports = {
   command: 'createWallet',
 	execute(message, args, db, walletSocket) {
     if (db.get(message.author.id)) return message.channel.send(errorEmbed('You already have a wallet?!'))
 
-    const key = curve.utils.randomPrivateKey()
-    curve.getPublicKey(key).then(publicKey => { 
-      const pubKey = uint8.uint8ToHex(publicKey) 
-      const privateKey = uint8.uint8ToHex(key).toUpperCase()
-
-      db.set(message.author.id, { privKey: privateKey, publicKey: 'K#' + pubKey })
+    kafiumJS.createWallet().then(walletObj => { 
+      db.set(message.author.id, { KWallet: walletObj.KWallet, publicKey: walletObj.publicKey, privKey: walletObj.privateKey })	
 
       const walletEmbed = new Discord.MessageEmbed()
         .setTitle('Wallet')
@@ -20,7 +15,7 @@ module.exports = {
         .setDescription(`Created a wallet for you!`);
       message.channel.send(walletEmbed)
     })
-	},
+	}
 }
 
 function errorEmbed(reason) {

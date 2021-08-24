@@ -8,7 +8,7 @@ module.exports = {
     const walletEmbed = new Discord.MessageEmbed()
       .setAuthor(`${message.author.username}'s wallet`, message.author.displayAvatarURL())
       .setColor('#1AAC7A')
-      .setDescription(`**Wallet Address:** \`\`${db.get(message.author.id).publicKey}\`\``);
+      .setDescription(`**Wallet Address:** \`\`${db.get(message.author.id).KWallet}\`\``);
     message.channel.send(walletEmbed)
 	},
 }

@@ -9,26 +9,17 @@ module.exports = {
 
     if (!args[0] || !args[1]) return message.channel.send(errorEmbed('Usage: ``?send <amount> <wallet>``'))
 
-    walletSocket.write('getLastHash&&')
-
-    waitForData(walletSocket, 'lastHash').then(hash => {
-        const createdAt = Date.now()
-        const latestHash = hash.toString().split('/')[1].replace('&&', '')
-        const calculateHash = crypto.createHash('ripemd160').update(parseInt(createdAt) + latestHash + db.get(message.author.id).publicKey + args[1] + (parseFloat(args[0]) * 100)).digest('hex')
-        curve.sign(calculateHash, db.get(message.author.id).privKey).then(tx => {
-          walletSocket.write(`newRawTransaction/${db.get(message.author.id).publicKey}|${args[1]}|${parseFloat(args[0]) * 100}|${tx}|${createdAt}&&`)
-          waitForData(walletSocket, 'rawTransactionSuccess').then(() => {
+    walletSocket.signTransaction(db.get(message.author.id).privKey, args[2], (parseFloat(args[1]) * 10000)).then(block => {
+        walletSocket.broadcastTransaction(block.data).then(tx => {
             const tranEmbed = new Discord.MessageEmbed()
-            .setTitle('Transaction success!')
+            .setTitle('Transaction broadcasted successfully!')
             .setColor('#1AAC7A')
-            .addField(`**Hash:**`, `\`\`${calculateHash}\`\``);
+            .addField(`**Hash:**`, `\`\`${block.hash}\`\``);
             message.channel.send(tranEmbed)
           }).catch(err => {
             message.channel.send(errorEmbed(err))
           })
         })
-    })
-
 	},
 }
 
@@ -42,17 +33,17 @@ function errorEmbed(reason) {
 
 function waitForData(socket, waitingData) {
   return new Promise((resolve, reject) => {
-      socket.on('data', listener)
+      socket.on('message', listener)
 
       function listener(data) {
           if(data.toString().includes(waitingData)) {
               resolve(data)
-              socket.removeListener('data', listener)
+              socket.removeListener('message', listener)
           }
 
           if(data.toString().startsWith('Error')) {
-              reject(data.toString().replace('Error/', '').replace('&&', ''))
-              socket.removeListener('data', listener)
+              reject(data.toString().replace('Error/', ''))
+              socket.removeListener('message', listener)
           }
       }
       
