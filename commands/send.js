@@ -1,6 +1,4 @@
 const Discord = require('discord.js')
-const crypto = require('crypto')
-const curve = require('noble-ed25519')
 
 module.exports = {
   command: 'send',
@@ -9,7 +7,7 @@ module.exports = {
 
     if (!args[0] || !args[1]) return message.channel.send(errorEmbed('Usage: ``?send <amount> <wallet>``'))
 
-    walletSocket.signTransaction(db.get(message.author.id).privKey, args[2], (parseFloat(args[1]) * 10000)).then(block => {
+    walletSocket.signTransaction(db.get(message.author.id).privKey, args[1], (parseFloat(args[0]) * 10000)).then(block => {
         walletSocket.bcTransactionBlock(block.data).then(() => {
             const tranEmbed = new Discord.MessageEmbed()
             .setTitle('Transaction broadcasted successfully!')

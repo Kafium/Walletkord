@@ -13,27 +13,17 @@ module.exports = {
     if (user === undefined) return message.channel.send(errorEmbed('Please mention a valid user.'))
     if (!db.get(user.id)) return message.channel.send(errorEmbed('Mentioned user must create a wallet first.'))
 
-    walletSocket.write('getLastHash&&')
-
-    waitForData(walletSocket, 'lastHash').then(hash => {
-        const createdAt = Date.now()
-        const latestHash = hash.toString().split('/')[1].replace('&&', '')
-        const calculateHash = crypto.createHash('ripemd160').update(parseInt(createdAt) + latestHash + db.get(message.author.id).publicKey + db.get(user.id).publicKey + (parseFloat(args[1]) * 100)).digest('hex')
-        curve.sign(calculateHash, db.get(message.author.id).privKey).then(tx => {
-          walletSocket.write(`newRawTransaction/${db.get(message.author.id).publicKey}|${db.get(user.id).publicKey}|${parseFloat(args[1]) * 100}|${tx}|${createdAt}&&`)
-          waitForData(walletSocket, 'rawTransactionSuccess').then(() => {
-            const tranEmbed = new Discord.MessageEmbed()
-            .setTitle('Transaction success!')
-            .setColor('#1AAC7A')
-            .setDescription(`${message.author.toString()} tipped ${args[1]} Kafiums to ${user.toString()}.`)
-            .addField(`**Hash:**`, `\`\`${calculateHash}\`\``);
-            message.channel.send(tranEmbed)
-          }).catch(err => {
-            message.channel.send(errorEmbed(err))
-          })
-        })
+    walletSocket.signTransaction(db.get(message.author.id).privKey, db.get(user.id).KWallet, (parseFloat(args[1]) * 10000)).then(block => {
+      walletSocket.bcTransactionBlock(block.data).then(() => {
+        const tranEmbed = new Discord.MessageEmbed()
+        .setTitle('Transaction executed!')
+        .setColor('#1AAC7A')
+        .addField(`**Hash:**`, `\`\`${block.hash}\`\``);
+        message.channel.send(tranEmbed)
+      }).catch(err => {
+        message.channel.send(errorEmbed(err))
+      })
     })
-
 	},
 }
 
