@@ -2,22 +2,22 @@ const Discord = require('discord.js')
 const crypto = require('crypto')
 
 module.exports = {
-  command: 'faucet',
-	execute(message, args, db, walletSocket, client) {
+  command: 'DISABLEDFORNOW2',
+	execute(message, args, db, kafiApi, client) {
     if (message.channel.id !== '869707781798772807') return
     if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
 
     const user = message.author
 
-    walletSocket.write('getLastHash&&')
+    kafiApi.write('getLastHash&&')
 
-    waitForData(walletSocket, 'lastHash').then(hash => {
+    waitForData(kafiApi, 'lastHash').then(hash => {
         const createdAt = Date.now()
         const latestHash = hash.toString().split('/')[1].replace('&&', '')
         const calculateHash = crypto.createHash('ripemd160').update(parseInt(createdAt) + latestHash + db.get(client.user.id).publicKey + db.get(user.id).publicKey + (200 * 100)).digest('hex')
         curve.sign(calculateHash, db.get(client.user.id).privKey).then(tx => {
-          walletSocket.write(`newRawTransaction/${db.get(client.user.id).publicKey}|${db.get(user.id).publicKey}|${200 * 100}|${tx}|${createdAt}&&`)
-          waitForData(walletSocket, 'rawTransactionSuccess').then(() => {
+          kafiApi.write(`newRawTransaction/${db.get(client.user.id).publicKey}|${db.get(user.id).publicKey}|${200 * 100}|${tx}|${createdAt}&&`)
+          waitForData(kafiApi, 'rawTransactionSuccess').then(() => {
             const tranEmbed = new Discord.MessageEmbed()
             .setTitle('Transaction success!')
             .setColor('#1AAC7A')

@@ -3,18 +3,17 @@ const kafiumJS = require('kafiumJS')
 
 module.exports = {
   command: 'createWallet',
-	execute(message, args, db, walletSocket) {
+	execute(message, args, db, kafiApi) {
     if (db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('You already have a wallet?!')] })
 
-    kafiumJS.createWallet().then(walletObj => { 
-      db.set(message.author.id, { KWallet: walletObj.KWallet, publicKey: walletObj.publicKey, privKey: walletObj.privateKey })	
+    const walletObj = kafiumJS.wallet.create()
+    db.set(message.author.id, { address: walletObj.walletAddress, privKey: walletObj.privateKey })	
 
-      const walletEmbed = new Discord.MessageEmbed()
-        .setTitle('Wallet')
-        .setColor('#1AAC7A')
-        .setDescription(`Created a wallet for you!`);
-      message.channel.send({ embeds: [walletEmbed] })
-    })
+    const walletEmbed = new Discord.MessageEmbed()
+      .setTitle('Wallet')
+      .setColor('#1AAC7A')
+      .setDescription(`Created a wallet for you!`);
+    message.channel.send({ embeds: [walletEmbed] })
 	}
 }
 

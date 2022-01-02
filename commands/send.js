@@ -1,14 +1,14 @@
 const Discord = require('discord.js')
 
 module.exports = {
-  command: 'send',
-	execute(message, args, db, walletSocket) {
+  command: 'DISABLEDFORNOW',
+	execute(message, args, db, kafiApi) {
     if (!db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('Please firstly create a wallet.')] })
 
     if (!args[0] || !args[1]) return message.channel.send({ embeds: [errorEmbed('Usage: ``?send <amount> <wallet>``')] })
 
-    walletSocket.signTransaction(db.get(message.author.id).privKey, args[1], (parseFloat(args[0]) * 10000)).then(block => {
-        walletSocket.bcTransactionBlock(block.data).then(() => {
+    kafiApi.signTransaction(db.get(message.author.id).privKey, args[1], (parseFloat(args[0]) * 10000)).then(block => {
+        kafiApi.bcTransactionBlock(block.data).then(() => {
             const tranEmbed = new Discord.MessageEmbed()
             .setTitle('Transaction broadcasted successfully!')
             .setColor('#1AAC7A')

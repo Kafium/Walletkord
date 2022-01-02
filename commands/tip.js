@@ -1,9 +1,10 @@
 const Discord = require('discord.js')
 const crypto = require('crypto')
+const kafiumJS = require('kafiumJS')
 
 module.exports = {
   command: 'tip',
-	execute(message, args, db, walletSocket) {
+	async execute(message, args, db, kafiApi) {
     if (!db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('Please firstly create a wallet.')] })
 
     if (!args[0] || !args[1]) return message.channel.send({ embeds: [errorEmbed('Usage: ``?tip <@user> <amount>``')] })
@@ -12,17 +13,27 @@ module.exports = {
     if (user === undefined) return message.channel.send({ embeds: [errorEmbed('Please mention a valid user.')] })
     if (!db.get(user.id)) return message.channel.send({ embeds: [errorEmbed('Mentioned user must create a wallet first.')] })
 
-    walletSocket.signTransaction(db.get(message.author.id).privKey, db.get(user.id).KWallet, (parseFloat(args[1]) * 10000)).then(block => {
-      walletSocket.bcTransactionBlock(block.data).then(() => {
-        const tranEmbed = new Discord.MessageEmbed()
-        .setTitle('Transaction executed!')
-        .setColor('#1AAC7A')
-        .addField(`**Hash:**`, `\`\`${block.hash}\`\``);
-        message.channel.send({ embeds: [tranEmbed] })
-      }).catch(err => {
-        message.channel.send({ embeds: [errorEmbed(err)] })
+    try {
+      const tipBlock = new kafiumJS.block('TRANSFER', {
+        sender: db.get(message.author.id).address,
+        recipient: db.get(user.id).address,
+        amount: (parseFloat(args[1]) * 10000)
       })
-    })
+
+      await tipBlock.setPreviousBlock(kafiApi).catch(err => { throw err })
+      tipBlock.computeWork()
+      await tipBlock.sign(new kafiumJS.wallet(db.get(message.author.id).privKey)).catch(err => { throw err })
+
+      await kafiApi.announceBlock(tipBlock).catch(err => { throw err })
+
+      const tranEmbed = new Discord.MessageEmbed()
+        .setTitle('Transaction announced!')
+        .setColor('#1AAC7A')
+        .addField(`**Hash:**`, `\`\`${tipBlock.calculateHash()}\`\``);
+      message.channel.send({ embeds: [tranEmbed] })
+    } catch(err) {
+      message.channel.send({ embeds: [errorEmbed(err.stack)] })
+    }
 	},
 }
 

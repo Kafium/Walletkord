@@ -10,7 +10,7 @@ const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "DIREC
 
 client.commands = new Discord.Collection()
 
-const walletSocket = new kafiumJS.node(config.nodeToCommunicate)
+const kafiApi = new kafiumJS.node(config.nodeToCommunicate)
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 
@@ -24,9 +24,8 @@ client.once('ready', () => {
 	console.log('Ready!')
 
 	if (!db.get(client.user.id)) {
-		kafiumJS.createWallet().then(walletObj => { 
-			db.set(client.user.id, { KWallet: walletObj.KWallet, publicKey: walletObj.publicKey, privKey: walletObj.privateKey })	
-		})
+		const walletObj = kafiumJS.wallet.create()
+		db.set(client.user.id, { address: walletObj.walletAddress, privKey: walletObj.privateKey })	
 	}
 })
 
@@ -39,7 +38,7 @@ client.on('messageCreate', message => {
 
 	if (!client.commands.has(command)) return
 
-	client.commands.get(command).execute(message, args, db, walletSocket, client)
+	client.commands.get(command).execute(message, args, db, kafiApi, client)
 })
 
 client.login(config.botToken)
