@@ -4,7 +4,7 @@ const kafiumJS = require('kafiumJS')
 module.exports = {
   command: 'createWallet',
 	execute(message, args, db, walletSocket) {
-    if (db.get(message.author.id)) return message.channel.send(errorEmbed('You already have a wallet?!'))
+    if (db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('You already have a wallet?!')] })
 
     kafiumJS.createWallet().then(walletObj => { 
       db.set(message.author.id, { KWallet: walletObj.KWallet, publicKey: walletObj.publicKey, privKey: walletObj.privateKey })	
@@ -13,7 +13,7 @@ module.exports = {
         .setTitle('Wallet')
         .setColor('#1AAC7A')
         .setDescription(`Created a wallet for you!`);
-      message.channel.send(walletEmbed)
+      message.channel.send({ embeds: [walletEmbed] })
     })
 	}
 }

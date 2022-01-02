@@ -4,14 +4,14 @@ module.exports = {
   command: 'balance',
   alias: 'bal',
 	execute(message, args, db, walletSocket) {
-    if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
+    if (!db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('Please firstly create a wallet.')]})
 
     walletSocket.getWalletBalance(db.get(message.author.id).KWallet).then(bal => {
       const walletEmbed = new Discord.MessageEmbed()
         .setTitle('Wallet')
         .setColor('#1AAC7A')
         .setDescription(`Balance: ${bal / 10000} Kafium`);
-      message.channel.send(walletEmbed)
+      message.channel.send({ embeds: [walletEmbed]})
     })
 	},
 }

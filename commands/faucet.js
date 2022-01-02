@@ -1,6 +1,5 @@
 const Discord = require('discord.js')
 const crypto = require('crypto')
-const curve = require('noble-ed25519')
 
 module.exports = {
   command: 'faucet',

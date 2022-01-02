@@ -3,9 +3,9 @@ const Discord = require('discord.js')
 module.exports = {
   command: 'send',
 	execute(message, args, db, walletSocket) {
-    if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
+    if (!db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('Please firstly create a wallet.')] })
 
-    if (!args[0] || !args[1]) return message.channel.send(errorEmbed('Usage: ``?send <amount> <wallet>``'))
+    if (!args[0] || !args[1]) return message.channel.send({ embeds: [errorEmbed('Usage: ``?send <amount> <wallet>``')] })
 
     walletSocket.signTransaction(db.get(message.author.id).privKey, args[1], (parseFloat(args[0]) * 10000)).then(block => {
         walletSocket.bcTransactionBlock(block.data).then(() => {
@@ -13,9 +13,9 @@ module.exports = {
             .setTitle('Transaction broadcasted successfully!')
             .setColor('#1AAC7A')
             .addField(`**Hash:**`, `\`\`${block.hash}\`\``);
-            message.channel.send(tranEmbed)
+            message.channel.send({ embeds: [tranEmbed] })
           }).catch(err => {
-            message.channel.send(errorEmbed(err))
+            message.channel.send({ embeds: [errorEmbed(err)] })
           })
         })
 	},

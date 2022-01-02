@@ -4,15 +4,12 @@
     "description": "Kafium official Discord wallet and tip bot",
     "license": "GPL-2.0",
     "engines": {
-        "node": "14.x"
+        "node": "v16.x"
     },
     "dependencies": {
-        "discord-buttons": "^4.0.0",
-        "discord.js": "^12.5.3",
-        "kafiumjs": "github:Kafium/kafiumJS",
+        "discord.js": "^13.1.0",
+        "kafiumjs": "github:kafium/kafiumjs",
         "kpow": "github:kafium/kpow",
-        "noble-ed25519": "^1.2.5",
-        "quick.db": "^7.1.3",
-        "ws": "^8.2.0"
+        "quick.db": "^7.1.3"
     }
 }

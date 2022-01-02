@@ -1,17 +1,16 @@
 const Discord = require('discord.js')
 const crypto = require('crypto')
-const curve = require('noble-ed25519')
 
 module.exports = {
   command: 'tip',
 	execute(message, args, db, walletSocket) {
-    if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
+    if (!db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('Please firstly create a wallet.')] })
 
-    if (!args[0] || !args[1]) return message.channel.send(errorEmbed('Usage: ``?tip <@user> <amount>``'))
+    if (!args[0] || !args[1]) return message.channel.send({ embeds: [errorEmbed('Usage: ``?tip <@user> <amount>``')] })
 
     const user = message.mentions.users.first()
-    if (user === undefined) return message.channel.send(errorEmbed('Please mention a valid user.'))
-    if (!db.get(user.id)) return message.channel.send(errorEmbed('Mentioned user must create a wallet first.'))
+    if (user === undefined) return message.channel.send({ embeds: [errorEmbed('Please mention a valid user.')] })
+    if (!db.get(user.id)) return message.channel.send({ embeds: [errorEmbed('Mentioned user must create a wallet first.')] })
 
     walletSocket.signTransaction(db.get(message.author.id).privKey, db.get(user.id).KWallet, (parseFloat(args[1]) * 10000)).then(block => {
       walletSocket.bcTransactionBlock(block.data).then(() => {
@@ -19,9 +18,9 @@ module.exports = {
         .setTitle('Transaction executed!')
         .setColor('#1AAC7A')
         .addField(`**Hash:**`, `\`\`${block.hash}\`\``);
-        message.channel.send(tranEmbed)
+        message.channel.send({ embeds: [tranEmbed] })
       }).catch(err => {
-        message.channel.send(errorEmbed(err))
+        message.channel.send({ embeds: [errorEmbed(err)] })
       })
     })
 	},
