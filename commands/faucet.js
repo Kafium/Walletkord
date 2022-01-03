@@ -1,10 +1,11 @@
 const Discord = require('discord.js')
+const kafiumJS = require('kafiumjs')
 
 module.exports = {
   command: 'faucet',
-	execute(message, args, db, kafiApi, client) {
+	async execute(message, args, db, kafiApi, client) {
     if (message.channel.id !== '869707781798772807') return
-    if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
+    if (!db.get(message.author.id)) return message.channel.send({ embeds: [errorEmbed('Please firstly create a wallet.')] })
 
     try {
       const sendBlock = new kafiumJS.block('TRANSFER', {
@@ -22,7 +23,7 @@ module.exports = {
       const tranEmbed = new Discord.MessageEmbed()
         .setTitle('Transaction announced!')
         .setColor('#1AAC7A')
-        .addField(`**Hash:**`, `\`\`${tipBlock.calculateHash()}\`\``);
+        .addField(`**Hash:**`, `\`\`${sendBlock.calculateHash()}\`\``);
       message.channel.send({ embeds: [tranEmbed] })
     } catch(err) {
       message.channel.send({ embeds: [errorEmbed(err.stack)] })

@@ -1,4 +1,5 @@
 const Discord = require('discord.js')
+const kafiumJS = require('kafiumjs')
 
 module.exports = {
   command: 'send',
@@ -25,7 +26,7 @@ module.exports = {
       const tranEmbed = new Discord.MessageEmbed()
         .setTitle('Transaction announced!')
         .setColor('#1AAC7A')
-        .addField(`**Hash:**`, `\`\`${tipBlock.calculateHash()}\`\``);
+        .addField(`**Hash:**`, `\`\`${sendBlock.calculateHash()}\`\``);
       message.channel.send({ embeds: [tranEmbed] })
     } catch(err) {
       message.channel.send({ embeds: [errorEmbed(err.stack)] })
