@@ -1,34 +1,32 @@
 const Discord = require('discord.js')
-const crypto = require('crypto')
 
 module.exports = {
-  command: 'DISABLEDFORNOW2',
+  command: 'faucet',
 	execute(message, args, db, kafiApi, client) {
     if (message.channel.id !== '869707781798772807') return
     if (!db.get(message.author.id)) return message.channel.send(errorEmbed('Please firstly create a wallet.'))
 
-    const user = message.author
-
-    kafiApi.write('getLastHash&&')
-
-    waitForData(kafiApi, 'lastHash').then(hash => {
-        const createdAt = Date.now()
-        const latestHash = hash.toString().split('/')[1].replace('&&', '')
-        const calculateHash = crypto.createHash('ripemd160').update(parseInt(createdAt) + latestHash + db.get(client.user.id).publicKey + db.get(user.id).publicKey + (200 * 100)).digest('hex')
-        curve.sign(calculateHash, db.get(client.user.id).privKey).then(tx => {
-          kafiApi.write(`newRawTransaction/${db.get(client.user.id).publicKey}|${db.get(user.id).publicKey}|${200 * 100}|${tx}|${createdAt}&&`)
-          waitForData(kafiApi, 'rawTransactionSuccess').then(() => {
-            const tranEmbed = new Discord.MessageEmbed()
-            .setTitle('Transaction success!')
-            .setColor('#1AAC7A')
-            .setDescription(`${client.user.toString()} tipped 200 Kafiums to ${user.toString()}.`)
-            .addField(`**Hash:**`, `\`\`${calculateHash}\`\``);
-            message.channel.send(tranEmbed)
-          }).catch(err => {
-            message.channel.send(errorEmbed(err))
-          })
-        })
+    try {
+      const sendBlock = new kafiumJS.block('TRANSFER', {
+        sender: db.get(client.user.id).address,
+        recipient: db.get(message.author.id).address,
+        amount: 10 * 1000000
       })
+
+      await sendBlock.setPreviousBlock(kafiApi)
+      sendBlock.computeWork()
+      await sendBlock.sign(new kafiumJS.wallet(db.get(client.user.id).privKey))
+
+      await kafiApi.announceBlock(sendBlock).catch(err => { message.channel.send({ embeds: [errorEmbed(err)] }) })
+
+      const tranEmbed = new Discord.MessageEmbed()
+        .setTitle('Transaction announced!')
+        .setColor('#1AAC7A')
+        .addField(`**Hash:**`, `\`\`${tipBlock.calculateHash()}\`\``);
+      message.channel.send({ embeds: [tranEmbed] })
+    } catch(err) {
+      message.channel.send({ embeds: [errorEmbed(err.stack)] })
+    }
 	},
 }
 
@@ -39,28 +37,3 @@ function errorEmbed(reason) {
     .setDescription(reason);
   return errorEmbed
 }
-
-function waitForData(socket, waitingData) {
-  return new Promise((resolve, reject) => {
-      socket.on('data', listener)
-
-      function listener(data) {
-          if(data.toString().includes(waitingData)) {
-              resolve(data)
-              socket.removeListener('data', listener)
-          }
-
-          if(data.toString().startsWith('Error')) {
-              reject(data.toString().replace('Error/', '').replace('&&', ''))
-              socket.removeListener('data', listener)
-          }
-      }
-      
-      wait(5000).then(() => {
-          reject('TIMEOUT')
-          socket.removeListener('data', listener)
-      })
-  })
-}
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms))

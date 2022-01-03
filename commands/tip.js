@@ -1,5 +1,4 @@
 const Discord = require('discord.js')
-const crypto = require('crypto')
 const kafiumJS = require('kafiumJS')
 
 module.exports = {
@@ -13,18 +12,20 @@ module.exports = {
     if (user === undefined) return message.channel.send({ embeds: [errorEmbed('Please mention a valid user.')] })
     if (!db.get(user.id)) return message.channel.send({ embeds: [errorEmbed('Mentioned user must create a wallet first.')] })
 
+    if (Math.sign(parseFloat(args[1])) !== 1 || message.author.id === user.id) return message.channel.send({ embeds: [errorEmbed('Invalid tip.')] })
+
     try {
       const tipBlock = new kafiumJS.block('TRANSFER', {
         sender: db.get(message.author.id).address,
         recipient: db.get(user.id).address,
-        amount: (parseFloat(args[1]) * 10000)
+        amount: Math.floor(parseFloat(args[1]) * 1000000)
       })
 
-      await tipBlock.setPreviousBlock(kafiApi).catch(err => { throw err })
+      await tipBlock.setPreviousBlock(kafiApi)
       tipBlock.computeWork()
-      await tipBlock.sign(new kafiumJS.wallet(db.get(message.author.id).privKey)).catch(err => { throw err })
+      await tipBlock.sign(new kafiumJS.wallet(db.get(message.author.id).privKey))
 
-      await kafiApi.announceBlock(tipBlock).catch(err => { throw err })
+      await kafiApi.announceBlock(tipBlock).catch(err => { message.channel.send({ embeds: [errorEmbed(err)] }) })
 
       const tranEmbed = new Discord.MessageEmbed()
         .setTitle('Transaction announced!')
