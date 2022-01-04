@@ -11,7 +11,7 @@ module.exports = {
       const sendBlock = new kafiumJS.block('TRANSFER', {
         sender: db.get(client.user.id).address,
         recipient: db.get(message.author.id).address,
-        amount: 10 * 1000000
+        amount: (10 * 1000000).toString()
       })
 
       await sendBlock.setPreviousBlock(kafiApi)

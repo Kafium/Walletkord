@@ -18,7 +18,7 @@ module.exports = {
       const tipBlock = new kafiumJS.block('TRANSFER', {
         sender: db.get(message.author.id).address,
         recipient: db.get(user.id).address,
-        amount: Math.floor(parseFloat(args[1]) * 1000000)
+        amount: (parseFloat(args[1]) * 1000000).toString()
       })
 
       await tipBlock.setPreviousBlock(kafiApi)
@@ -45,28 +45,3 @@ function errorEmbed(reason) {
     .setDescription(reason);
   return errorEmbed
 }
-
-function waitForData(socket, waitingData) {
-  return new Promise((resolve, reject) => {
-      socket.on('data', listener)
-
-      function listener(data) {
-          if(data.toString().includes(waitingData)) {
-              resolve(data)
-              socket.removeListener('data', listener)
-          }
-
-          if(data.toString().startsWith('Error')) {
-              reject(data.toString().replace('Error/', '').replace('&&', ''))
-              socket.removeListener('data', listener)
-          }
-      }
-      
-      wait(5000).then(() => {
-          reject('TIMEOUT')
-          socket.removeListener('data', listener)
-      })
-  })
-}
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
