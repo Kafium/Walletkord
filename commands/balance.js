@@ -10,7 +10,7 @@ module.exports = {
       const walletEmbed = new Discord.MessageEmbed()
         .setTitle('Wallet')
         .setColor('#1AAC7A')
-        .setDescription(`Balance: ${BigInt(bal) / BigInt(1000000)} Kafium`);
+        .setDescription(`Balance: ${parseInt(bal) / parseFloat(1000000)} Kafium`);
       message.channel.send({ embeds: [walletEmbed]})
     })
 	},
